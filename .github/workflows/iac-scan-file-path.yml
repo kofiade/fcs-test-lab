@@ -1,0 +1,41 @@
+name: IaC Scan - Directory Path Test (Expected Pass)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  iac-scan-dir-path:
+    name: IaC Scan with Directory Path
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run FCS IaC Scan
+        uses: crowdstrike/fcs-action@v4.0.1
+        id: fcs
+        with:
+          falcon_client_id: ${{ vars.FALCON_CLIENT_ID }}
+          falcon_region: ${{ vars.FALCON_REGION }}
+          path: './cloudformation'
+          report_formats: 'sarif'
+          output_path: './scan-results'         # ✅ Directory path - should pass
+        env:
+          FALCON_CLIENT_SECRET: ${{ secrets.FALCON_CLIENT_SECRET }}
+
+      - name: List Output Directory
+        if: always()
+        run: |
+          echo "=== Output Directory Contents ==="
+          ls -la ./scan-results/ || echo "Directory not found"
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: steps.fcs.outputs.exit-code != 0
+        with:
+          sarif_file: ./scan-results
+
+      - name: Print Exit Code
+        if: always()
+        run: |
+          echo "Exit Code: ${{ steps.fcs.outputs.exit-code }}"

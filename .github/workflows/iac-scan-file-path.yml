@@ -19,7 +19,7 @@ jobs:
           falcon_region: ${{ vars.FALCON_REGION }}
           path: './cloudformation'
           report_formats: 'sarif'
-          output_path: './scan-results'         # ✅ Directory path - should pass
+          output_path: './scan-results'         # ✅ Directory path - should pass.
         env:
           FALCON_CLIENT_SECRET: ${{ secrets.FALCON_CLIENT_SECRET }}
 
